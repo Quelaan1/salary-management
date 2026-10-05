@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import auth, employees
+from app import auth, employees, insights
 from app.config import COOKIE_SECURE, required
 from app.db import engine
 from app.models import prepare_database
@@ -37,3 +37,4 @@ app.add_middleware(
 app.include_router(api)
 app.include_router(auth.router)
 app.include_router(employees.router)
+app.include_router(insights.router)
