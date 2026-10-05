@@ -8,10 +8,6 @@ Rates are ECB reference rates for 2026-10-05, from https://api.frankfurter.dev.
 
 from decimal import Decimal
 
-# ponytail: every currency here has two decimal places. Add a per-currency
-# exponent before adding one that does not (JPY, KWD).
-MINOR_UNITS = 100
-
 # country -> (currency, units of that currency per 1 USD)
 COUNTRIES: dict[str, tuple[str, Decimal]] = {
     "Australia": ("AUD", Decimal("1.4367")),

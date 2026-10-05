@@ -1,10 +1,12 @@
 from datetime import date, datetime
+from decimal import Decimal
 
 from sqlalchemy import CheckConstraint, ForeignKey, String, func
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship
 
 from app.countries import RATES
+from app.money import to_major
 
 
 class Base(DeclarativeBase):
@@ -45,6 +47,10 @@ class Employee(Base):
     def employee_number(self) -> str:
         return f"E{self.id:05d}"
 
+    @property
+    def salary(self) -> Decimal:
+        return to_major(self.salary_minor)
+
 
 class SalaryChange(Base):
     __tablename__ = "salary_changes"
@@ -57,6 +63,14 @@ class SalaryChange(Base):
     effective_date: Mapped[date]
     reason: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    @property
+    def old_salary(self) -> Decimal | None:
+        return None if self.old_salary_minor is None else to_major(self.old_salary_minor)
+
+    @property
+    def new_salary(self) -> Decimal:
+        return to_major(self.new_salary_minor)
 
 
 def prepare_database(engine: Engine) -> None:
