@@ -6,9 +6,10 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { NavLink, Outlet, Route, Routes } from 'react-router'
+import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import { api, ApiError } from './api'
 import Login from './pages/Login'
+import People from './pages/People'
 
 async function signedIn(): Promise<boolean> {
   try {
@@ -28,7 +29,10 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="*" element={<Shell />} />
+      <Route element={<Shell />}>
+        <Route path="people" element={<People />} />
+        <Route path="*" element={<Navigate to="/people" replace />} />
+      </Route>
     </Routes>
   )
 }
