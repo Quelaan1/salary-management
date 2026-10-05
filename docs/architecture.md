@@ -13,6 +13,15 @@ flowchart LR
     end
 ```
 
+## Deploy
+
+Dokploy clones the repository, builds the Dockerfile and runs one container. The address is a generated sslip.io name with a Let's Encrypt certificate: https://salary-management-s90gum-eef6ee-2-29-32-184.sslip.io
+
+- The image holds the API and the built UI. The container runs as a non-root user and has a health check on `/api/health`.
+- A named volume at `/data` holds the SQLite file, so a redeploy keeps the data.
+- `HR_PASSWORD` and `SESSION_SECRET` are set in Dokploy. The app refuses to start without them.
+- On the first start the app creates its tables and seeds 10,000 employees.
+
 ## Stack
 
 | Part | Choice |

@@ -35,6 +35,9 @@ I am building this with Claude Code. This file records how I direct it and where
 - Generated the current Vite template in a scratch folder to copy its config, and read the MUI 9 and React Router 8 upgrade notes before writing components.
 - Type-checked, linted and ran the tests at each UI commit.
 - Opened each screen in a browser against the seeded data and saved a salary change.
+- Served the built UI from FastAPI on my machine and opened a page address to confirm a reload works.
+- Docker was not running on my machine, so CI builds the image, starts a container and checks the API and the UI.
+- Checked the live app after the deploy: sign-in, the 10,000 employees, insights, a page address and the HTTPS certificate.
 
 ## Calls Claude made while building
 
@@ -49,3 +52,5 @@ These fell inside the agreed plan, so Claude decided them and recorded them here
 - Filters, sort and page live in the URL under the API's own parameter names.
 - Dropdowns are native selects and suggestions use a native datalist. There is no date picker or autocomplete library.
 - Insights draw a bar per group inside the table. There is no chart library.
+- The container runs as a non-root user and has a health check.
+- The live address is a generated sslip.io name. It needed no DNS change and is easy to replace.

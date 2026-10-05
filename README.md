@@ -2,6 +2,10 @@
 
 A web tool for ACME's HR manager: keep salaries current for 10,000 employees and see how the company pays people. Built for the Incubyte engineering assessment.
 
+Live: https://salary-management-s90gum-eef6ee-2-29-32-184.sslip.io
+
+Sign-in needs the HR password. It is not in this repository.
+
 ## What it does
 
 - Find people by name or email. Filter by country, department, job title or status.
