@@ -32,6 +32,9 @@ I am building this with Claude Code. This file records how I direct it and where
 - Timed the API against the 10,000 seeded employees. The numbers are in the architecture notes.
 - Opened the app against the seeded data and saw four people named Aarav Almeida. The seed now takes names from Faker, with a locale per country.
 - Accented names exposed a search gap: SQLite lowercases ASCII letters only. The connection now uses Python's lower().
+- Generated the current Vite template in a scratch folder to copy its config, and read the MUI 9 and React Router 8 upgrade notes before writing components.
+- Type-checked, linted and ran the tests at each UI commit.
+- Opened each screen in a browser against the seeded data and saved a salary change.
 
 ## Calls Claude made while building
 
@@ -43,3 +46,6 @@ These fell inside the agreed plan, so Claude decided them and recorded them here
 - The seed uses eight countries whose currencies all have two decimal places.
 - A salary change cannot be dated in the future or before the previous change.
 - The app creates its tables at startup. There is no migration tool yet.
+- Filters, sort and page live in the URL under the API's own parameter names.
+- Dropdowns are native selects and suggestions use a native datalist. There is no date picker or autocomplete library.
+- Insights draw a bar per group inside the table. There is no chart library.

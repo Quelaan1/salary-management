@@ -18,9 +18,9 @@ flowchart LR
 | Part | Choice |
 | --- | --- |
 | Backend | Python, FastAPI, SQLAlchemy, SQLite |
-| UI | React, TypeScript, Vite, MUI |
+| UI | React, TypeScript, Vite, MUI, React Router, TanStack Query |
 | Tests | pytest for the backend, Vitest for the UI |
-| Tooling | uv, npm, GitHub Actions for lint and tests |
+| Tooling | uv and ruff, npm and oxlint, GitHub Actions for lint and tests |
 
 ## Data
 
@@ -48,6 +48,15 @@ All calls sit under `/api`, so they do not clash with page addresses.
 | `GET /insights` | figures for the company, or by country, department or job title |
 | `GET /filters` | values for the filter dropdowns |
 | `GET /health` | liveness check, open without login |
+
+## UI
+
+Three screens: the people list, one person, and insights.
+
+- Filters, sort and page live in the URL, so a view can be bookmarked or shared. The URL uses the API's own parameter names and passes them straight through.
+- TanStack Query caches server data and refetches after a change.
+- Dropdowns are native selects, and department and job title suggest existing values through a native datalist.
+- Insights draw a bar per group inside the table. There is no chart library.
 
 ## Trade-offs
 
