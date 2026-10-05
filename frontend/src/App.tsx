@@ -10,6 +10,7 @@ import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import { api, ApiError } from './api'
 import Login from './pages/Login'
 import People from './pages/People'
+import Person from './pages/Person'
 import PersonForm from './pages/PersonForm'
 
 async function signedIn(): Promise<boolean> {
@@ -33,6 +34,7 @@ export default function App() {
       <Route element={<Shell />}>
         <Route path="people" element={<People />} />
         <Route path="people/new" element={<PersonForm />} />
+        <Route path="people/:id" element={<Person />} />
         <Route path="*" element={<Navigate to="/people" replace />} />
       </Route>
     </Routes>
