@@ -26,7 +26,7 @@ flowchart LR
 
 - `employees`: employee number, name, email, country, department, job title, hire date, status, annual salary, currency.
 - `salary_changes`: one row per change with the old amount, new amount, effective date and reason. The app adds rows and leaves old ones untouched.
-- `exchange_rates`: a currency and its rate to USD.
+- `exchange_rates`: a currency and its rate to USD. The rates are the ECB reference rates for 2026-10-05.
 
 The database stores salaries as whole numbers in the smallest unit of the currency (cents, paise), so sums pick up no rounding errors.
 
@@ -39,6 +39,7 @@ All calls sit under `/api`, so they do not clash with page addresses.
 | Call | Purpose |
 | --- | --- |
 | `POST /login`, `POST /logout` | start and end the HR session |
+| `GET /session` | tell the UI whether it is signed in |
 | `GET /employees` | search, filter, sort, page |
 | `POST /employees` | add a person |
 | `GET /employees/{id}` | one person with their salary timeline |
@@ -46,6 +47,7 @@ All calls sit under `/api`, so they do not clash with page addresses.
 | `POST /employees/{id}/salary` | change a salary |
 | `GET /insights` | figures for the company, or by country, department or job title |
 | `GET /filters` | values for the filter dropdowns |
+| `GET /health` | liveness check, open without login |
 
 ## Trade-offs
 
@@ -56,6 +58,10 @@ All calls sit under `/api`, so they do not clash with page addresses.
 | Shared password with a signed cookie | Keeps the data private without building accounts | No record of who changed what |
 | Fixed exchange rates | Same totals on each run | Totals drift from real rates |
 | Median with window functions | SQLite's `median()` needs a build option that is off by default | More SQL to maintain |
+| Insights in USD only | One currency makes groups comparable | Country figures do not appear in local currency |
+| Country and hire date fixed after creation | A move changes currency and pay together | A relocation needs a new record |
+| Tables created at startup, no migrations | The schema has one version so far | A schema change after release needs a migration tool |
+| No limit on login attempts | A long random password makes guessing impractical | Needs a limit before real use |
 | No browser end-to-end tests | Unit tests cover the logic and keep each run short | Layout bugs need a manual check |
 
 ## Performance at 10,000 employees
@@ -64,4 +70,6 @@ All calls sit under `/api`, so they do not clash with page addresses.
 - Indexes cover country, department, job title and status.
 - Insights run as grouped queries in the database. The app does not load all rows into memory.
 - Name search scans the table, which is acceptable at this size. Millions of rows would need a full-text index.
-- The seed script inserts all rows in one transaction.
+- The seed script inserts all rows in one transaction. The app runs it on start when the database has no employees.
+
+Measured on a laptop against the seeded data, inside the API process: a list page takes 1 to 6 ms and an insights view 12 to 14 ms.
