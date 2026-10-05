@@ -27,3 +27,19 @@ I am building this with Claude Code. This file records how I direct it and where
 - Read the whole brief before planning.
 - Read SQLite's docs before relying on `median()`. The function needs a build option that is off by default, so the plan uses window functions.
 - Listed the Python versions uv offers and took the newest stable one.
+- Fetched the ECB rates for 2026-10-05 for the fixed rate table. The source is named in the code.
+- Replaced httpx with httpx2 after the first test run printed a Starlette deprecation warning.
+- Timed the API against the 10,000 seeded employees. The numbers are in the architecture notes.
+- Opened the app against the seeded data and saw four people named Aarav Almeida. The seed now takes names from Faker, with a locale per country.
+- Accented names exposed a search gap: SQLite lowercases ASCII letters only. The connection now uses Python's lower().
+
+## Calls Claude made while building
+
+These fell inside the agreed plan, so Claude decided them and recorded them here.
+
+- The API sits under `/api` so its paths do not clash with page addresses.
+- Insights show USD only. Local-currency figures per country are left out.
+- Country and hire date stay fixed after a person is added.
+- The seed uses eight countries whose currencies all have two decimal places.
+- A salary change cannot be dated in the future or before the previous change.
+- The app creates its tables at startup. There is no migration tool yet.
