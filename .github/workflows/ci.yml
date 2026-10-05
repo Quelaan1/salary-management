@@ -35,3 +35,18 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm test
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Dockerfile uses the Node version in frontend/.nvmrc
+        run: grep -q "^FROM node:$(cat frontend/.nvmrc)-" Dockerfile
+      - run: docker build -t salary-management .
+      - name: Container starts, seeds and serves the API and the UI
+        run: |
+          docker run -d --name app -p 8000:8000 -e HR_PASSWORD=ci-password -e SESSION_SECRET=ci-secret salary-management
+          curl --fail --silent --retry 15 --retry-delay 2 --retry-all-errors http://localhost:8000/api/health
+          curl --fail --silent http://localhost:8000/people | grep -q '<div id="root">'
+      - if: failure()
+        run: docker logs app
