@@ -48,6 +48,12 @@ class EmployeeEdit(BaseModel):
     status: Status | None = None
 
 
+class SalaryChangeIn(BaseModel):
+    salary: Money
+    effective_date: date
+    reason: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+
+
 class EmployeeOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

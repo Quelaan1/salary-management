@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -16,6 +17,7 @@ from app.schemas import (
     EmployeeIn,
     EmployeeOut,
     EmployeePage,
+    SalaryChangeIn,
     Status,
 )
 
@@ -111,4 +113,32 @@ def edit_employee(employee_id: int, body: EmployeeEdit, db: Db) -> EmployeeOut:
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(employee, field, value)
     save(db)
+    return employee
+
+
+@router.post("/{employee_id}/salary", status_code=201)
+def change_salary(employee_id: int, body: SalaryChangeIn, db: Db) -> EmployeeDetail:
+    employee = find(db, employee_id)
+    new_salary = to_minor(body.salary)
+    last_change = employee.salary_changes[-1].effective_date
+
+    if employee.status != "active":
+        raise HTTPException(409, "This person has left")
+    if new_salary == employee.salary_minor:
+        raise HTTPException(409, "That is already their salary")
+    if body.effective_date > date.today():
+        raise HTTPException(422, "The date cannot be in the future")
+    if body.effective_date < last_change:
+        raise HTTPException(422, f"The date cannot be before their last change on {last_change}")
+
+    employee.salary_changes.append(
+        SalaryChange(
+            old_salary_minor=employee.salary_minor,
+            new_salary_minor=new_salary,
+            effective_date=body.effective_date,
+            reason=body.reason,
+        )
+    )
+    employee.salary_minor = new_salary
+    db.commit()
     return employee
