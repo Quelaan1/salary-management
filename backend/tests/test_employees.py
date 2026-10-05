@@ -110,6 +110,13 @@ def test_search_matches_name_or_email_ignoring_case(client, three_people, search
     assert names(client.get("/api/employees", params={"search": search})) == found
 
 
+def test_search_ignores_case_in_accented_names(client):
+    add(client, full_name="Ângela Müller")
+
+    assert names(client.get("/api/employees", params={"search": "ângela"})) == ["Ângela Müller"]
+    assert names(client.get("/api/employees", params={"search": "MÜLLER"})) == ["Ângela Müller"]
+
+
 @pytest.mark.parametrize(
     ("filters", "found"),
     [
