@@ -3,6 +3,7 @@ name = "salary-management"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "faker>=40.41.0",
     "fastapi>=0.142.2",
     "itsdangerous>=2.2.0",
     "pydantic[email]>=2.13.5",

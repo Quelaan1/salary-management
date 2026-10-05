@@ -1,3 +1,4 @@
+import re
 from itertools import pairwise
 
 import pytest
@@ -55,6 +56,13 @@ def test_each_timeline_runs_from_the_starting_salary_to_the_current_one(session)
         for earlier, later in pairwise(timeline):
             assert later.old_salary_minor == earlier.new_salary_minor
             assert later.effective_date >= earlier.effective_date
+
+
+def test_emails_use_plain_letters_whatever_the_name(session):
+    seed(session, 500)
+
+    for employee in session.scalars(select(Employee)):
+        assert re.fullmatch(r"[a-z]+\.[a-z]+\d+@acme\.example", employee.email), employee.email
 
 
 def test_seed_refuses_a_database_that_has_employees(session):

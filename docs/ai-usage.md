@@ -30,6 +30,8 @@ I am building this with Claude Code. This file records how I direct it and where
 - Fetched the ECB rates for 2026-10-05 for the fixed rate table. The source is named in the code.
 - Replaced httpx with httpx2 after the first test run printed a Starlette deprecation warning.
 - Timed the API against the 10,000 seeded employees. The numbers are in the architecture notes.
+- Opened the app against the seeded data and saw four people named Aarav Almeida. The seed now takes names from Faker, with a locale per country.
+- Accented names exposed a search gap: SQLite lowercases ASCII letters only. The connection now uses Python's lower().
 
 ## Calls Claude made while building
 

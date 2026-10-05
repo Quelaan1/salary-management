@@ -8,8 +8,11 @@ The random generator starts from a fixed number, so each run creates the same pe
 
 import argparse
 import random
+import re
+import unicodedata
 from datetime import date, timedelta
 
+from faker import Faker
 from sqlalchemy import delete, func, insert, select
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
@@ -20,20 +23,6 @@ from app.money import MINOR_UNITS
 
 FIRST_HIRE = date(2012, 1, 2)
 LAST_DAY = date(2026, 9, 30)
-
-FIRST_NAMES = """
-Aarav Aditi Akira Alice Amara Ananya Andre Anna Arjun Beatriz Ben Camila Carlos Chloe
-Daniel Diego Elena Emma Fatima Felix Gabriel Grace Hannah Hiro Imran Isabel Jack Kavya
-Lars Leah Liam Lucas Mei Mia Mohan Nadia Noah Olivia Priya Rahul Rohan Sara Sofia Tariq
-Thomas Vikram Wei Zoe
-""".split()
-
-LAST_NAMES = """
-Almeida Bauer Bose Brown Carter Chen Costa Das Evans Fernandes Fischer Gupta Harris
-Iyer Jones Kapoor Khan Kim Kumar Lee Lim Martin Mehta Meyer Nair Nguyen Oliveira Patel
-Rao Reddy Santos Schmidt Sharma Silva Singh Smith Tan Taylor Thomas Verma Walker Wang
-White Williams Wilson Wong Young Zhang
-""".split()
 
 # department -> (share of headcount, pay factor, job titles from junior to senior)
 DEPARTMENTS = {
@@ -59,16 +48,16 @@ DEPARTMENTS = {
     "Design": (0.03, 1.0, ["Product Designer", "Senior Product Designer", "Design Lead"]),
 }
 
-# country -> (share of headcount, pay compared with the United States)
+# country -> (share of headcount, pay compared with the United States, locale for names)
 COUNTRY_MIX = {
-    "India": (0.35, 0.3),
-    "United States": (0.25, 1.0),
-    "United Kingdom": (0.10, 0.8),
-    "Germany": (0.08, 0.8),
-    "Brazil": (0.07, 0.4),
-    "Canada": (0.06, 0.8),
-    "Australia": (0.05, 0.85),
-    "Singapore": (0.04, 0.8),
+    "India": (0.35, 0.3, "en_IN"),
+    "United States": (0.25, 1.0, "en_US"),
+    "United Kingdom": (0.10, 0.8, "en_GB"),
+    "Germany": (0.08, 0.8, "de_DE"),
+    "Brazil": (0.07, 0.4, "pt_BR"),
+    "Canada": (0.06, 0.8, "en_CA"),
+    "Australia": (0.05, 0.85, "en_AU"),
+    "Singapore": (0.04, 0.8, "en_MS"),
 }
 
 # Annual pay in USD for a junior, mid and senior job, and how common each level is.
@@ -84,9 +73,10 @@ def seed(session: Session, count: int = 10_000, *, reset: bool = False) -> None:
         raise ValueError("The database already has employees. Use --reset to replace them.")
 
     rng = random.Random(42)
+    names = name_makers()
     employees, changes = [], []
     for employee_id in range(1, count + 1):
-        employee, history = make_employee(rng, employee_id)
+        employee, history = make_employee(rng, names, employee_id)
         employees.append(employee)
         changes.extend(history)
 
@@ -95,9 +85,20 @@ def seed(session: Session, count: int = 10_000, *, reset: bool = False) -> None:
     session.commit()
 
 
-def make_employee(rng: random.Random, employee_id: int) -> tuple[dict, list[dict]]:
-    first, last = rng.choice(FIRST_NAMES), rng.choice(LAST_NAMES)
-    country = pick(rng, {name: share for name, (share, _) in COUNTRY_MIX.items()})
+def name_makers() -> dict[str, Faker]:
+    """One name generator per country, each started from its own fixed number."""
+    makers = {}
+    for number, (country, (_, _, locale)) in enumerate(COUNTRY_MIX.items()):
+        makers[country] = Faker(locale)
+        makers[country].seed_instance(number)
+    return makers
+
+
+def make_employee(
+    rng: random.Random, names: dict[str, Faker], employee_id: int
+) -> tuple[dict, list[dict]]:
+    country = pick(rng, {name: mix[0] for name, mix in COUNTRY_MIX.items()})
+    first, last = names[country].first_name(), names[country].last_name()
     department = pick(rng, {name: share for name, (share, _, _) in DEPARTMENTS.items()})
     level = rng.choices(range(3), LEVEL_SHARE)[0]
     currency, per_usd = COUNTRIES[country]
@@ -116,7 +117,7 @@ def make_employee(rng: random.Random, employee_id: int) -> tuple[dict, list[dict
     employee = {
         "id": employee_id,
         "full_name": f"{first} {last}",
-        "email": f"{first}.{last}{employee_id}@acme.example".lower(),
+        "email": f"{email_name(first)}.{email_name(last)}{employee_id}@acme.example",
         "country": country,
         "department": department,
         "job_title": DEPARTMENTS[department][2][level],
@@ -126,6 +127,12 @@ def make_employee(rng: random.Random, employee_id: int) -> tuple[dict, list[dict
         "currency": currency,
     }
     return employee, history
+
+
+def email_name(name: str) -> str:
+    """Plain lowercase letters only: 'João' becomes 'joao', "O'Brien" becomes 'obrien'."""
+    plain = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z]", "", plain.lower())
 
 
 def pick(rng: random.Random, shares: dict[str, float]) -> str:
