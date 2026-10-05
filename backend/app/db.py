@@ -1,9 +1,10 @@
-import os
 from collections.abc import Iterator
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
+
+from app.config import DATABASE_URL
 
 
 def make_engine(url: str, **options) -> Engine:
@@ -17,7 +18,7 @@ def make_engine(url: str, **options) -> Engine:
     return engine
 
 
-engine = make_engine(os.environ.get("DATABASE_URL", "sqlite:///salary.db"))
+engine = make_engine(DATABASE_URL)
 
 
 def get_session() -> Iterator[Session]:
