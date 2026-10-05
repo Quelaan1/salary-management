@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import { api, ApiError } from './api'
+import Insights from './pages/Insights'
 import Login from './pages/Login'
 import People from './pages/People'
 import Person from './pages/Person'
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="people" element={<People />} />
         <Route path="people/new" element={<PersonForm />} />
         <Route path="people/:id" element={<Person />} />
+        <Route path="insights" element={<Insights />} />
         <Route path="*" element={<Navigate to="/people" replace />} />
       </Route>
     </Routes>
