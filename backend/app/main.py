@@ -7,6 +7,7 @@ from app import auth, employees
 from app.config import COOKIE_SECURE, required
 from app.db import engine
 from app.models import prepare_database
+from app.seed import seed_if_empty
 
 api = APIRouter(prefix="/api")
 
@@ -20,6 +21,7 @@ def health() -> dict[str, str]:
 async def lifespan(_app: FastAPI):
     required("HR_PASSWORD")
     prepare_database(engine)
+    seed_if_empty(engine)
     yield
 
 

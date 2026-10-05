@@ -19,12 +19,21 @@ def password():
     return PASSWORD
 
 
-@pytest.fixture
-def session():
+def empty_database():
     engine = make_engine("sqlite://", poolclass=StaticPool)
     prepare_database(engine)
     with Session(engine, expire_on_commit=False) as session:
         yield session
+
+
+@pytest.fixture
+def session():
+    yield from empty_database()
+
+
+@pytest.fixture
+def other_session():
+    yield from empty_database()
 
 
 @pytest.fixture
